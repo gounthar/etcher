@@ -59,6 +59,15 @@ else
 		ifeq ($(shell uname -m),arm64)
 			HOST_ARCH = aarch64
 		endif
+		ifeq ($(shell uname -m),mips64)
+			HOST_ARCH = mips64le
+		endif
+		ifeq ($(shell uname -m),s390x)
+			HOST_ARCH = s390x
+		endif
+		ifeq ($(shell uname -m),ppc64le)
+			HOST_ARCH = ppc64le
+		endif
 	endif
 	ifeq ($(shell uname -s),Darwin)
 		PLATFORM = darwin
@@ -76,6 +85,7 @@ ifndef PLATFORM
 $(error We could not detect your host platform)
 endif
 ifndef HOST_ARCH
+$(error We found $(shell uname -m) as architecture)
 $(error We could not detect your host architecture)
 endif
 
