@@ -85,7 +85,7 @@ ifndef PLATFORM
 $(error We could not detect your host platform)
 endif
 ifndef HOST_ARCH
-echo $(shell uname -m) architecture
+$(error We found $(uname -m) as architecture
 $(error We could not detect your host architecture)
 endif
 
