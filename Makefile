@@ -59,7 +59,7 @@ else
 		ifeq ($(shell uname -m),arm64)
 			HOST_ARCH = aarch64
 		endif
-		ifeq ($(shell uname -m),mips64le)
+		ifeq ($(shell uname -m),mips64)
 			HOST_ARCH = mips64le
 		endif
 		ifeq ($(shell uname -m),s390x)
