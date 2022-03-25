@@ -65,9 +65,6 @@ else
 		ifeq ($(shell uname -m),s390x)
 			HOST_ARCH = s390x
 		endif
-		ifeq ($(shell uname -m),ppc64le)
-			HOST_ARCH = ppc64le
-		endif
 	endif
 	ifeq ($(shell uname -s),Darwin)
 		PLATFORM = darwin
