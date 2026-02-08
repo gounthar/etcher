@@ -10,7 +10,6 @@
 
 set -euo pipefail
 
-LOGFILE="$HOME/etcher-riscv-build.log"
 BUILD_DIR="$HOME/etcher-riscv-build-src"
 ELECTRON_VERSION="37.2.4"
 ELECTRON_RISCV_URL="https://github.com/riscv-forks/electron-riscv-releases/releases/download/v${ELECTRON_VERSION}.riscv1/electron-v${ELECTRON_VERSION}-linux-riscv64.zip"
@@ -30,7 +29,8 @@ echo ""
 # V8's JIT compiler generates invalid riscv64 code causing "unreachable code" crashes
 # --jitless forces interpreter-only mode: slower but stable
 export NODE_OPTIONS="--jitless"
-export MAKEFLAGS="-j$(nproc)"
+MAKEFLAGS="-j$(nproc)"
+export MAKEFLAGS
 echo "NODE_OPTIONS: $NODE_OPTIONS (V8 JIT disabled for riscv64 stability)"
 echo "MAKEFLAGS: $MAKEFLAGS (parallel native compilation on $(nproc) cores)"
 echo ""
@@ -199,7 +199,7 @@ fi
 
 # Extract Electron binary
 echo "  Extracting to $ELECTRON_EXTRACT_DIR..."
-rm -rf "$ELECTRON_EXTRACT_DIR"/*
+rm -rf "${ELECTRON_EXTRACT_DIR:?}"/*
 unzip -qo "$ELECTRON_ZIP" -d "$ELECTRON_EXTRACT_DIR"
 
 # Ensure the electron binary is executable
@@ -208,10 +208,7 @@ chmod +x "$ELECTRON_EXTRACT_DIR/electron"
 # Also place the zip in the format electron-download expects:
 #   ~/.cache/electron/SHASUMS256.txt-37.2.4 (fake, optional)
 #   The zip filename with the right naming convention
-ELECTRON_CACHE_ZIP="$ELECTRON_CACHE_DIR/electron-v${ELECTRON_VERSION}-linux-riscv64.zip"
-if [ ! -f "$ELECTRON_CACHE_ZIP" ]; then
-    cp "$ELECTRON_ZIP" "$ELECTRON_CACHE_ZIP"
-fi
+cp -n "$ELECTRON_ZIP" "$ELECTRON_CACHE_DIR/electron-v${ELECTRON_VERSION}-linux-riscv64.zip" 2>/dev/null || true
 
 echo "  Electron binary: $ELECTRON_EXTRACT_DIR/electron"
 "$ELECTRON_EXTRACT_DIR/electron" --version 2>/dev/null && true
@@ -383,7 +380,16 @@ function build(
 			'# etcher-util wrapper for riscv64 (replaces pkg binary)',
 			'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"',
 			'SIDECAR_DIR="$SCRIPT_DIR/sidecar-dist"',
-			'export NODE_PATH="$SCRIPT_DIR/../../app/node_modules:$NODE_PATH"',
+			'# Resolve node_modules from the app directory (works with both asar and unpacked)',
+			'APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"',
+			'export NODE_PATH="$APP_DIR/node_modules:${NODE_PATH:-}"',
+			'# Use bundled Electron as Node.js runtime for ABI compatibility',
+			'ELECTRON_BIN="$(cd "$SCRIPT_DIR/../../.." && pwd)/electron"',
+			'if [ -x "$ELECTRON_BIN" ]; then',
+			'  export ELECTRON_RUN_AS_NODE=1',
+			'  exec "$ELECTRON_BIN" "$SIDECAR_DIR/util/api.js" "$@"',
+			'fi',
+			'# Fallback to system node (development mode)',
 			'exec node "$SIDECAR_DIR/util/api.js" "$@"',
 			'',
 		].join('\n');
@@ -734,7 +740,7 @@ if (!src.includes(\"'riscv64'\")) {
 }
 
 // 2. Add 'riscv64' to linux platform arch combos
-if (!src.includes(\"linux:.*riscv64\") && src.includes(\"linux: ['ia32'\")) {
+if (!src.match(/linux:.*riscv64/) && src.includes(\"linux: ['ia32'\")) {
     src = src.replace(
         \"linux: ['ia32', 'x64', 'armv7l', 'arm64', 'mips64el']\",
         \"linux: ['ia32', 'x64', 'armv7l', 'arm64', 'mips64el', 'riscv64']\"
@@ -806,8 +812,8 @@ echo "  NODE_OPTIONS: $NODE_OPTIONS"
 echo "  Running: npx electron-forge package --platform=linux --arch=riscv64"
 echo "  (this may take a while...)"
 
-npx electron-forge package --platform=linux --arch=riscv64 2>&1
-PACKAGE_EXIT=$?
+npx electron-forge package --platform=linux --arch=riscv64 2>&1 || PACKAGE_EXIT=$?
+PACKAGE_EXIT=${PACKAGE_EXIT:-0}
 
 if [ "$PACKAGE_EXIT" -ne 0 ]; then
     echo ""

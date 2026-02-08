@@ -8,6 +8,8 @@
 
 set -euo pipefail
 
+: "${ELECTRON_OVERRIDE_DIST_PATH:?ELECTRON_OVERRIDE_DIST_PATH must be set}"
+
 info() { echo "[patch] $*"; }
 
 # Reset source files to upstream before applying patches (idempotent re-runs)
@@ -24,7 +26,6 @@ cp .github/riscv64/forge.sidecar.ts forge.sidecar.ts
 # -------------------------------------------------------------------------
 info "Creating .npmrc..."
 cat > .npmrc << 'EOF'
-electron_mirror=https://github.com/nicehash/nicehash-electron-riscv64/releases/download/
 ELECTRON_SKIP_BINARY_DOWNLOAD=1
 EOF
 

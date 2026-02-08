@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.etcher_version || github.ref }}
 
       - name: Verify environment
         run: |
@@ -184,4 +186,6 @@ jobs:
             RELEASE_ARGS+=("$DEB_FILE")
           fi
 
-          gh release create "${RELEASE_ARGS[@]}"
+          gh release create "${RELEASE_ARGS[@]}" 2>/dev/null || \
+            gh release upload "$TAG" "${RELEASE_ARGS[@]:1}" --clobber 2>/dev/null || \
+            echo "::warning::Release $TAG already exists and upload failed"
