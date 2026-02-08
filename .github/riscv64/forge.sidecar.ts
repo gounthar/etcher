@@ -89,8 +89,9 @@ function build(
 			'# etcher-util wrapper for riscv64 (replaces pkg binary)',
 			'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"',
 			'SIDECAR_DIR="$SCRIPT_DIR/sidecar-dist"',
-			'export NODE_PATH="$SCRIPT_DIR/../../app/node_modules:$NODE_PATH"',
-			'exec node "$SIDECAR_DIR/util/api.js" "$@"',
+			'ELECTRON_BIN="$SCRIPT_DIR/../balena-etcher"',
+			'export ELECTRON_RUN_AS_NODE=1',
+			'exec "$ELECTRON_BIN" "$SIDECAR_DIR/util/api.js" "$@"',
 			'',
 		].join('\n');
 
