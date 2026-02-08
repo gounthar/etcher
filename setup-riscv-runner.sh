@@ -15,6 +15,9 @@
 set -euo pipefail
 
 REPO_SLUG="${1:-gounthar/etcher}"
+if [[ ! "$REPO_SLUG" =~ ^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$ ]]; then
+    error "Invalid repo slug: '$REPO_SLUG' (expected 'owner/repo')"
+fi
 RUNNER_HOST="poddingue@192.168.1.185"
 RUNNER_DIR="/home/poddingue/github-act-runner"
 RUNNER_NAME="bananapi-f3-etcher"

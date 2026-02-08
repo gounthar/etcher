@@ -252,8 +252,8 @@ npm install --ignore-scripts 2>&1 || {
 # Rebuild only the native modules the sidecar actually needs on Linux
 # (blanket npm rebuild fails on Windows-only packages like electron-winstaller)
 echo "  Rebuilding native modules needed by sidecar..."
-SIDECAR_NATIVE_MODULES="usb lzma-native drivelist mountutils xxhash-addon @ronomon/direct-io bufferutil utf-8-validate"
-for mod in $SIDECAR_NATIVE_MODULES; do
+SIDECAR_NATIVE_MODULES=(usb lzma-native drivelist mountutils xxhash-addon @ronomon/direct-io bufferutil utf-8-validate)
+for mod in "${SIDECAR_NATIVE_MODULES[@]}"; do
     echo "    Rebuilding $mod..."
     npm rebuild "$mod" 2>&1 || echo "    Warning: $mod rebuild failed (may be optional)"
 done
@@ -346,7 +346,6 @@ function build(
 	// Step 1: TypeScript compilation (same as upstream)
 	log('running: tsc --project tsconfig.sidecar.json --outDir', sourcesDir);
 	execFileSync('tsc', ['--project', 'tsconfig.sidecar.json', '--outDir', sourcesDir], {
-		shell: true,
 		stdio: 'inherit',
 	});
 
@@ -359,7 +358,6 @@ function build(
 		log('running: npm rebuild mountutils --arch=' + arch);
 		try {
 			execFileSync('npm', ['rebuild', 'mountutils', `--arch=${arch}`], {
-				shell: true,
 				stdio: 'inherit',
 			});
 		} catch (e) {
@@ -524,12 +522,15 @@ if [ -d "$ELECTRON_MODULE_PATH" ]; then
     ELECTRON_INDEX="$ELECTRON_MODULE_PATH/index.js"
 
     # Create a simple override that returns our riscv64 electron path
-    cat > "$ELECTRON_INDEX" << ELECTRON_SHIM_EOF
-// Patched for riscv64 build — points to community Electron binary
-const path = require('path');
-const electronPath = '${ELECTRON_EXTRACT_DIR}/electron';
-module.exports = electronPath;
-ELECTRON_SHIM_EOF
+    node -e "
+        const fs = require('fs');
+        const p = JSON.stringify(process.env.ELECTRON_EXTRACT_DIR + '/electron');
+        const content = '// Patched for riscv64 build\n'
+            + 'const path = require(\"path\");\n'
+            + 'const electronPath = ' + p + ';\n'
+            + 'module.exports = electronPath;\n';
+        fs.writeFileSync(process.argv[1], content);
+    " "$ELECTRON_INDEX"
 
     # Also patch dist/index.js if it exists
     if [ -f "$ELECTRON_MODULE_PATH/dist/index.js" ]; then

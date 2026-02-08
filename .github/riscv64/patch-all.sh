@@ -34,12 +34,15 @@ EOF
 info "Patching Electron module path..."
 ELECTRON_INDEX="node_modules/electron/index.js"
 if [ -f "$ELECTRON_INDEX" ]; then
-    cat > "$ELECTRON_INDEX" << SHIM_EOF
-// Patched for riscv64 build — points to community Electron binary
-const path = require('path');
-const electronPath = '${ELECTRON_EXTRACT_DIR}/electron';
-module.exports = electronPath;
-SHIM_EOF
+    node -e "
+        const fs = require('fs');
+        const p = JSON.stringify(process.env.ELECTRON_OVERRIDE_DIST_PATH + '/electron');
+        const content = '// Patched for riscv64 build\\n'
+            + 'const path = require(\"path\");\\n'
+            + 'const electronPath = ' + p + ';\\n'
+            + 'module.exports = electronPath;\\n';
+        fs.writeFileSync(process.argv[1], content);
+    " "$ELECTRON_INDEX"
 
     if [ -f "node_modules/electron/dist/index.js" ]; then
         cp "$ELECTRON_INDEX" "node_modules/electron/dist/index.js"

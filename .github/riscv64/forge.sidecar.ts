@@ -58,7 +58,6 @@ function build(
 ) {
 	log('running: tsc --project tsconfig.sidecar.json --outDir', sourcesDir);
 	execFileSync('tsc', ['--project', 'tsconfig.sidecar.json', '--outDir', sourcesDir], {
-		shell: true,
 		stdio: 'inherit',
 	});
 
@@ -70,7 +69,6 @@ function build(
 		log('running: npm rebuild mountutils --arch=' + arch);
 		try {
 			execFileSync('npm', ['rebuild', 'mountutils', `--arch=${arch}`], {
-				shell: true,
 				stdio: 'inherit',
 			});
 		} catch (e) {

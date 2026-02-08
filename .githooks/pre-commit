@@ -5,14 +5,14 @@
 
 branch=$(git symbolic-ref --short HEAD 2>/dev/null)
 
-if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
-    echo "ERROR: Direct commits to '$branch' are not allowed."
-    echo ""
-    echo "Create a feature branch instead:"
-    echo "  git checkout -b feat/your-feature"
-    echo "  git checkout -b fix/your-bugfix"
-    echo ""
-    echo "To bypass this check (emergency only):"
-    echo "  git commit --no-verify"
+if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+    echo "ERROR: Direct commits to '$branch' are not allowed." >&2
+    echo "" >&2
+    echo "Create a feature branch instead:" >&2
+    echo "  git checkout -b feat/your-feature" >&2
+    echo "  git checkout -b fix/your-bugfix" >&2
+    echo "" >&2
+    echo "To bypass this check (emergency only):" >&2
+    echo "  git commit --no-verify" >&2
     exit 1
 fi
