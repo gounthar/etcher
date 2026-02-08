@@ -14,8 +14,8 @@ LOGFILE="$HOME/etcher-riscv-build.log"
 BUILD_DIR="$HOME/etcher-riscv-build-src"
 ELECTRON_VERSION="37.2.4"
 ELECTRON_RISCV_URL="https://github.com/riscv-forks/electron-riscv-releases/releases/download/v${ELECTRON_VERSION}.riscv1/electron-v${ELECTRON_VERSION}-linux-riscv64.zip"
-ELECTRON_CACHE_DIR="$HOME/.cache/electron"
-ELECTRON_EXTRACT_DIR="$HOME/electron-riscv64"
+export ELECTRON_CACHE_DIR="$HOME/.cache/electron"
+export ELECTRON_EXTRACT_DIR="$HOME/electron-riscv64"
 
 phase_pass() { echo "[PHASE $1] PASS: $2"; }
 phase_fail() { echo "[PHASE $1] FAIL: $2"; exit 1; }
@@ -298,7 +298,7 @@ import debug from 'debug';
 
 const log = debug('sidecar');
 
-function isStartScrpt(): boolean {
+function isStartScript(): boolean {
 	return process.env.npm_lifecycle_event === 'start';
 }
 
@@ -318,7 +318,7 @@ function addWebpackDefine(
 			mainConfig.plugins = [];
 		}
 
-		const value = isStartScrpt()
+		const value = isStartScript()
 			? // on `npm start`, point directly to the binary
 				path.resolve(binDir, binName)
 			: // otherwise point relative to the resources folder of the bundled app
@@ -350,7 +350,7 @@ function build(
 	});
 
 	buildForArchs.split(',').forEach((arch) => {
-		const binPath = isStartScrpt()
+		const binPath = isStartScript()
 			? path.resolve(binDir, binName)
 			: path.resolve(binDir, arch, binName);
 
@@ -415,7 +415,7 @@ function copyArtifact(
 	binDir: string,
 	binName: string,
 ) {
-	const binPath = isStartScrpt()
+	const binPath = isStartScript()
 		? path.resolve(binDir, binName)
 		: path.resolve(binDir, arch, binName);
 
@@ -442,7 +442,7 @@ export class SidecarPlugin extends PluginBase<void> {
 	constructor() {
 		super();
 		this.getHooks = this.getHooks.bind(this);
-		log('isStartScript:', isStartScrpt());
+		log('isStartScript:', isStartScript());
 	}
 
 	getHooks(): ForgeMultiHookMap {

@@ -14,7 +14,7 @@ import debug from 'debug';
 
 const log = debug('sidecar');
 
-function isStartScrpt(): boolean {
+function isStartScript(): boolean {
 	return process.env.npm_lifecycle_event === 'start';
 }
 
@@ -34,7 +34,7 @@ function addWebpackDefine(
 			mainConfig.plugins = [];
 		}
 
-		const value = isStartScrpt()
+		const value = isStartScript()
 			? path.resolve(binDir, binName)
 			: binName;
 
@@ -62,7 +62,7 @@ function build(
 	});
 
 	buildForArchs.split(',').forEach((arch) => {
-		const binPath = isStartScrpt()
+		const binPath = isStartScript()
 			? path.resolve(binDir, binName)
 			: path.resolve(binDir, arch, binName);
 
@@ -121,7 +121,7 @@ function copyArtifact(
 	binDir: string,
 	binName: string,
 ) {
-	const binPath = isStartScrpt()
+	const binPath = isStartScript()
 		? path.resolve(binDir, binName)
 		: path.resolve(binDir, arch, binName);
 
@@ -145,7 +145,7 @@ export class SidecarPlugin extends PluginBase<void> {
 	constructor() {
 		super();
 		this.getHooks = this.getHooks.bind(this);
-		log('isStartScript:', isStartScrpt());
+		log('isStartScript:', isStartScript());
 	}
 
 	getHooks(): ForgeMultiHookMap {

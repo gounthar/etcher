@@ -14,15 +14,6 @@
 
 set -euo pipefail
 
-REPO_SLUG="${1:-gounthar/etcher}"
-if [[ ! "$REPO_SLUG" =~ ^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$ ]]; then
-    error "Invalid repo slug: '$REPO_SLUG' (expected 'owner/repo')"
-fi
-RUNNER_HOST="poddingue@192.168.1.185"
-RUNNER_DIR="/home/poddingue/github-act-runner"
-RUNNER_NAME="bananapi-f3-etcher"
-SERVICE_NAME="github-runner"
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -31,6 +22,15 @@ NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
+
+REPO_SLUG="${1:-gounthar/etcher}"
+if [[ ! "$REPO_SLUG" =~ ^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$ ]]; then
+    error "Invalid repo slug: '$REPO_SLUG' (expected 'owner/repo')"
+fi
+RUNNER_HOST="poddingue@192.168.1.185"
+RUNNER_DIR="/home/poddingue/github-act-runner"
+RUNNER_NAME="bananapi-f3-etcher"
+SERVICE_NAME="github-runner"
 
 # --- Check local prerequisites ---
 for cmd in gh ssh; do

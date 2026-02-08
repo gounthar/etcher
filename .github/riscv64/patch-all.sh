@@ -36,7 +36,8 @@ ELECTRON_INDEX="node_modules/electron/index.js"
 if [ -f "$ELECTRON_INDEX" ]; then
     node -e "
         const fs = require('fs');
-        const p = JSON.stringify(process.env.ELECTRON_OVERRIDE_DIST_PATH + '/electron');
+        const dir = process.env.ELECTRON_EXTRACT_DIR || process.env.ELECTRON_OVERRIDE_DIST_PATH;
+        const p = JSON.stringify(dir + '/electron');
         const content = '// Patched for riscv64 build\\n'
             + 'const path = require(\"path\");\\n'
             + 'const electronPath = ' + p + ';\\n'
@@ -47,7 +48,7 @@ if [ -f "$ELECTRON_INDEX" ]; then
     if [ -f "node_modules/electron/dist/index.js" ]; then
         cp "$ELECTRON_INDEX" "node_modules/electron/dist/index.js"
     fi
-    info "Electron module patched → $ELECTRON_EXTRACT_DIR/electron"
+    info "Electron module patched → ${ELECTRON_EXTRACT_DIR:-$ELECTRON_OVERRIDE_DIST_PATH}/electron"
 fi
 
 # -------------------------------------------------------------------------
