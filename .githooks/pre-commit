@@ -1,0 +1,18 @@
+#!/bin/bash
+# pre-commit hook — block direct commits to default branch
+#
+# Activate with: git config core.hooksPath .githooks
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+    echo "ERROR: Direct commits to '$branch' are not allowed." >&2
+    echo "" >&2
+    echo "Create a feature branch instead:" >&2
+    echo "  git checkout -b feat/your-feature" >&2
+    echo "  git checkout -b fix/your-bugfix" >&2
+    echo "" >&2
+    echo "To bypass this check (emergency only):" >&2
+    echo "  git commit --no-verify" >&2
+    exit 1
+fi
