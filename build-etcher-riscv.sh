@@ -380,11 +380,12 @@ function build(
 			'# etcher-util wrapper for riscv64 (replaces pkg binary)',
 			'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"',
 			'SIDECAR_DIR="$SCRIPT_DIR/sidecar-dist"',
-			'# Resolve node_modules from the app directory (works with both asar and unpacked)',
-			'APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"',
-			'export NODE_PATH="$APP_DIR/node_modules:${NODE_PATH:-}"',
+			'# Resolve node_modules: SCRIPT_DIR is resources/etcher-util/',
+			'# so node_modules is at resources/app/node_modules/',
+			'export NODE_PATH="$SCRIPT_DIR/../app/node_modules:${NODE_PATH:-}"',
 			'# Use bundled Electron as Node.js runtime for ABI compatibility',
-			'ELECTRON_BIN="$(cd "$SCRIPT_DIR/../../.." && pwd)/electron"',
+			'# Electron binary is at <app-root>/electron, two levels up from resources/etcher-util/',
+			'ELECTRON_BIN="$(cd "$SCRIPT_DIR/../.." && pwd)/electron"',
 			'if [ -x "$ELECTRON_BIN" ]; then',
 			'  export ELECTRON_RUN_AS_NODE=1',
 			'  exec "$ELECTRON_BIN" "$SIDECAR_DIR/util/api.js" "$@"',
@@ -509,7 +510,6 @@ echo "  Patching package.json for riscv64 build..."
 # official binary. We've already set ELECTRON_SKIP_BINARY_DOWNLOAD=1 and
 # ELECTRON_OVERRIDE_DIST_PATH, but let's also add an .npmrc for safety.
 cat > "$BUILD_DIR/.npmrc" << 'NPMRC_EOF'
-electron_mirror=https://github.com/nicehash/nicehash-electron-riscv64/releases/download/
 ELECTRON_SKIP_BINARY_DOWNLOAD=1
 NPMRC_EOF
 

@@ -180,12 +180,19 @@ jobs:
           - Runs with --jitless (V8 interpreter-only) for stability on current riscv64 hardware
           - .xz image support may be unavailable (lzma-native build issue)"
 
-          RELEASE_ARGS=("$TAG" --title "balenaEtcher $TAG (riscv64)" --notes "$NOTES")
-
+          UPLOAD_FILES=()
           if [ -n "$DEB_FILE" ]; then
-            RELEASE_ARGS+=("$DEB_FILE")
+            UPLOAD_FILES+=("$DEB_FILE")
           fi
 
-          gh release create "${RELEASE_ARGS[@]}" 2>/dev/null || \
-            gh release upload "$TAG" "${RELEASE_ARGS[@]:1}" --clobber 2>/dev/null || \
-            echo "::warning::Release $TAG already exists and upload failed"
+          if gh release view "$TAG" &>/dev/null; then
+            echo "Release $TAG already exists, uploading assets..."
+            if [ ${#UPLOAD_FILES[@]} -gt 0 ]; then
+              gh release upload "$TAG" "${UPLOAD_FILES[@]}" --clobber
+            fi
+          else
+            gh release create "$TAG" \
+              --title "balenaEtcher $TAG (riscv64)" \
+              --notes "$NOTES" \
+              "${UPLOAD_FILES[@]}"
+          fi

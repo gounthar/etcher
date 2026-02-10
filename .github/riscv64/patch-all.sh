@@ -9,6 +9,8 @@
 set -euo pipefail
 
 : "${ELECTRON_OVERRIDE_DIST_PATH:?ELECTRON_OVERRIDE_DIST_PATH must be set}"
+: "${ELECTRON_EXTRACT_DIR:?ELECTRON_EXTRACT_DIR must be set}"
+: "${ELECTRON_CACHE_DIR:?ELECTRON_CACHE_DIR must be set}"
 
 info() { echo "[patch] $*"; }
 
